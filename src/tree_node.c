@@ -14,7 +14,7 @@ Tree_Node* tree_node_create(const char* name, NODE_TYPE type)
     Tree_Node* tn = malloc(sizeof(Tree_Node));
 
     tn->name = malloc(MAX_NAME_SIZE);
-    strncpy(tn->name, name, MAX_NAME_SIZE - 1);
+    memcpy(tn->name, name, MAX_NAME_SIZE - 1);
     tn->name[MAX_NAME_SIZE - 1] = '\0';
 
     tn->type = type;
@@ -89,8 +89,8 @@ char* tree_node_read_file(Tree_Node* tn, uint32_t start, uint32_t size)
     size = (start + size) >= MAX_FILE_SIZE ? MAX_FILE_SIZE - start - 1 : size;
 
     char* read = malloc(size + 1);  // +1 for null terminator
-    strncpy(read, tn->file.data + start, size);
-
+    memcpy(read, tn->file.data + start, size);
+    read[size] = '\0';              // null terminate
     return read;
 }
 
@@ -98,13 +98,34 @@ char* tree_node_write_file(Tree_Node* tn, const char* data, uint32_t size, bool 
 {
     if (tn->type != NODE_LEAF) { return NULL; }
     // if overwriting, start writing from the start
-    // TODO: also set final size at end
     if (overwrite) {
         tn->file.pos = 0;
+        tn->file.size = size;
+    } else {
+        tn->file.size += size;
     }
+    
+    // if there is more to write than we have space, we only write as much as we have space
+    if (tn->file.pos + size >= MAX_FILE_SIZE) {
+        size = MAX_FILE_SIZE - tn->file.pos - 1;
+    }
+    
+    memcpy(tn->file.data + tn->file.pos, data, size);
 
-    if (tn->file.pos + size >= MAX_FILE_SIZE) { return NULL; }
+    return tn->file.data;   // return the file's data
+}
 
+bool tree_node_delete(Tree_Node* parent, Tree_Node* child)
+{
+    uint32_t child_idx = MAX_CHILDREN;
+    for (uint32_t i = 0; i < MAX_CHILDREN; i++) {
+        if (strcmp(parent->name, child->name) == 0) {
+            child_idx = i;
+            break;
+        }
+    }
+    // not found
+    if (child_idx == MAX_CHILDREN) { return false; }
 
 }
 

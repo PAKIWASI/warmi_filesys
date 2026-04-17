@@ -34,9 +34,6 @@ void filesystem_destroy(filesystem* fs)
 }
 
 
-void filesystem_create_file(filesystem* fs, const char* name)
-{
-}
 
 
 

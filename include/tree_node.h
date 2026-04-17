@@ -50,7 +50,7 @@ struct Tree_Node {
 // create a new node
 Tree_Node* tree_node_create(const char* name, NODE_TYPE type);
 
-// destroy a node
+// destroy a node. if it's a dir, recursivly delete subtree
 void tree_node_destroy(Tree_Node* tn);
 
 
@@ -62,6 +62,14 @@ Tree_Node* tree_node_create_child(Tree_Node* tn, const char* name, NODE_TYPE typ
 // make node 'child' a child of node 'parent'
 Tree_Node* tree_node_append_node(Tree_Node* parent, Tree_Node* child);
 
+// delete the child node and set it's parent's slot to NULL
+bool tree_node_delete(Tree_Node* parent, Tree_Node* child);
+
+void tree_node_delete_child_by_name(Tree_Node* tn, const char* name);
+
+void tree_node_delete_child_by_index(Tree_Node* tn, uint32_t idx);
+
+
 
 // file read/write
 
@@ -70,5 +78,11 @@ char* tree_node_read_file(Tree_Node* tn, uint32_t start, uint32_t size);
 
 // write at the current cursor postition of overwrite
 char* tree_node_write_file(Tree_Node* tn, const char* data, uint32_t size, bool overwrite);
+
+
+// utilites
+uint32_t tree_node_find_child(Tree_Node* parent, Tree_Node* child);
+
+uint32_t tree_node_find_child_by_name(Tree_Node* parent, const char* name);
 
 #endif // TREE_NODE_H
