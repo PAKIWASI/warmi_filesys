@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 
+#define GET_CURR_DIR(fs) (fs->curr_dirs[fs->depth])
 
 
 
@@ -12,13 +13,17 @@ filesystem* filesystem_create(void)
 
     // create root node (a directory)
     fs->root = tree_node_create("root", NODE_BRANCH);
-    fs->curr_dir = fs->root;    // curr dir set to root
+
+    // set the curr_dirs stack
+    fs->curr_dirs = (Tree_Node**)malloc(sizeof(Tree_Node*) * MAX_DEPTH);
     
     // metadata
+    fs->depth = 0;
     fs->total_dirs = 1; // the root dir
     fs->total_files = 0;
-    // only root so depth of tree is 0
-    fs->depth = 0;
+
+    GET_CURR_DIR(fs) = fs->root;
+    fs->depth++;    // curr dir is root, stack has 1 item
 
     return fs;
 }

@@ -7,7 +7,7 @@
 
 #define MAX_FILE_SIZE 4096  // 4KB
 #define MAX_NAME_SIZE 128   // bytes
-#define MAX_CHILDREN  100   // 100 subdirectories/files possible for each node
+#define MAX_CHILDREN  256   // 256 subdirectories/files possible for each node
 
 
 // tree node types
