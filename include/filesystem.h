@@ -33,29 +33,46 @@ void filesystem_destroy(filesystem* fs);
 // filesystem navigation
 
 // the "ls" command equivalent
-bool filesystem_show_dir(filesystem* fs);
+bool filesystem_ls(filesystem* fs);
 
 // the "cd" command equivalent
 // supports ".." to go to parent
-bool filesystem_change_dir(filesystem* fs, const char* dirname);
+bool filesystem_cd(filesystem* fs, const char* dirname);
 
-// TODO: how to go back to parent dir ? how will we set the filesystem.parent ?
+// move a file/dir "src" to "dest"
+bool filesystem_mv(filesystem* fs, Tree_Node* dest, Tree_Node* src);
+
+// supports any dir name in curr_dir or ".." to move one layer up
+bool filesyste_mv_by_name(filesystem* fs, Tree_Node* tn, const char* dir);
 
 
 // file/directory creation/deletion
 
 // create file in current directory
-Tree_Node* filesystem_create_file(filesystem* fs, const char* name);
+Tree_Node* filesystem_touch(filesystem* fs, const char* name);
 
-// delete file in the current directory
-bool filesystem_delete_file(filesystem* fs, const char* name);
+// create a directory
+Tree_Node* filesystem_mkdir(filesystem* fs, const char* name);
+
+// delete file/dir in the current directory
+bool filesystem_rm(filesystem* fs, const char* name);
 
 
 // file reading/writing
 
 // view a file in the current directory
-bool filesystem_view_file(filesystem* fs, const char* name, uint32_t start, uint32_t size);
+bool filesystem_cat(filesystem* fs, const char* name, uint32_t start, uint32_t size);
 
 bool filesystem_write_file(filesystem* fs, const char* data, bool overwrite);
+
+
+// persistance
+
+bool filesystem_save(filesystem* fs, const char* path);
+
+bool filesystem_load(const char* filepath);
+
+
+// TODO:  11.	Show memory map → should show the distribution of files in the memory.
 
 #endif // FILESYSTEM_H
