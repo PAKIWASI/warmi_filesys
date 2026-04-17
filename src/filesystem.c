@@ -4,10 +4,6 @@
 #include <stdlib.h>
 
 
-// helpers
-
-static void filesystem_destroy_helper(Tree_Node* tn);
-
 
 
 filesystem* filesystem_create(void)
@@ -15,7 +11,8 @@ filesystem* filesystem_create(void)
     filesystem* fs = malloc(sizeof(filesystem));
 
     // create root node (a directory)
-    fs->root = tree_node_create(NODE_BRANCH);
+    fs->root = tree_node_create("root", NODE_BRANCH);
+    fs->curr_dir = fs->root;    // curr dir set to root
     
     // metadata
     fs->total_dirs = 1; // the root dir
@@ -29,7 +26,8 @@ filesystem* filesystem_create(void)
 void filesystem_destroy(filesystem* fs)
 {
     // recursivly destroy whole tree, from leaves to root
-    filesystem_destroy_helper(fs->root);
+    tree_node_destroy(fs->root);
+
     free(fs);
 }
 

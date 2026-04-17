@@ -67,16 +67,18 @@ bool tree_node_delete_child(Tree_Node* parent, Tree_Node* child);
 
 bool tree_node_delete_child_by_name(Tree_Node* tn, const char* name);
 
+
 // file read/write
 
-// return a malloced char* if the requested data
-char* tree_node_read_file(Tree_Node* tn, uint32_t start, uint32_t size);
+// print the file content to console
+void tree_node_read_file(Tree_Node* tn, uint32_t start, uint32_t size);
 
 // write at the current cursor postition of overwrite
 char* tree_node_write_file(Tree_Node* tn, const char* data, uint32_t size, bool overwrite);
 
 
 // utilites
+
 uint32_t tree_node_find_child(Tree_Node* parent, Tree_Node* child);
 
 uint32_t tree_node_find_child_by_name(Tree_Node* parent, const char* name);

@@ -1,6 +1,7 @@
 #include "tree_node.h"
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -81,18 +82,34 @@ Tree_Node* tree_node_append_node(Tree_Node* parent, Tree_Node* child)
     return child;
 }
 
-char* tree_node_read_file(Tree_Node* tn, uint32_t start, uint32_t size)
+// char* tree_node_read_file(Tree_Node* tn, uint32_t start, uint32_t size)
+// {
+//     if (tn->type != NODE_LEAF) { return NULL; }
+//
+//     // clamp to max file size if size is greater
+//     size = (start + size) >= MAX_FILE_SIZE ? MAX_FILE_SIZE - start - 1 : size;
+//
+//     char* read = malloc(size + 1);  // +1 for null terminator
+//     memcpy(read, tn->file.data + start, size);
+//     read[size] = '\0';              // null terminate
+//     return read;
+// }
+
+void tree_node_read_file(Tree_Node* tn, uint32_t start, uint32_t size)
 {
-    if (tn->type != NODE_LEAF) { return NULL; }
+    if (tn->type != NODE_LEAF) { return; }
 
     // clamp to max file size if size is greater
-    size = (start + size) >= MAX_FILE_SIZE ? MAX_FILE_SIZE - start - 1 : size;
+    uint32_t end = (start + size) >= MAX_FILE_SIZE ?
+                    MAX_FILE_SIZE - 1 : (start + size);
 
-    char* read = malloc(size + 1);  // +1 for null terminator
-    memcpy(read, tn->file.data + start, size);
-    read[size] = '\0';              // null terminate
-    return read;
+    putchar('\n');
+    for (uint32_t i = start; i < end; i++) {
+        putchar(tn->file.data[i]);
+    }
+    putchar('\n');
 }
+
 
 char* tree_node_write_file(Tree_Node* tn, const char* data, uint32_t size, bool overwrite)
 {
