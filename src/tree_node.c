@@ -97,12 +97,13 @@ char* tree_node_read_file(Tree_Node* tn, uint32_t start, uint32_t size)
 char* tree_node_write_file(Tree_Node* tn, const char* data, uint32_t size, bool overwrite)
 {
     if (tn->type != NODE_LEAF) { return NULL; }
-
     // if overwriting, start writing from the start
     // TODO: also set final size at end
     if (overwrite) {
         tn->file.pos = 0;
     }
+
+    if (tn->file.pos + size >= MAX_FILE_SIZE) { return NULL; }
 
 
 }
