@@ -63,13 +63,9 @@ Tree_Node* tree_node_create_child(Tree_Node* tn, const char* name, NODE_TYPE typ
 Tree_Node* tree_node_append_node(Tree_Node* parent, Tree_Node* child);
 
 // delete the child node and set it's parent's slot to NULL
-bool tree_node_delete(Tree_Node* parent, Tree_Node* child);
+bool tree_node_delete_child(Tree_Node* parent, Tree_Node* child);
 
-void tree_node_delete_child_by_name(Tree_Node* tn, const char* name);
-
-void tree_node_delete_child_by_index(Tree_Node* tn, uint32_t idx);
-
-
+bool tree_node_delete_child_by_name(Tree_Node* tn, const char* name);
 
 // file read/write
 
@@ -84,5 +80,6 @@ char* tree_node_write_file(Tree_Node* tn, const char* data, uint32_t size, bool 
 uint32_t tree_node_find_child(Tree_Node* parent, Tree_Node* child);
 
 uint32_t tree_node_find_child_by_name(Tree_Node* parent, const char* name);
+
 
 #endif // TREE_NODE_H

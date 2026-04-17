@@ -115,8 +115,40 @@ char* tree_node_write_file(Tree_Node* tn, const char* data, uint32_t size, bool 
     return tn->file.data;   // return the file's data
 }
 
-bool tree_node_delete(Tree_Node* parent, Tree_Node* child)
+bool tree_node_delete_child(Tree_Node* parent, Tree_Node* child)
 {
+    uint32_t child_idx = tree_node_find_child(parent, child);
+    // not found
+    if (child_idx == MAX_CHILDREN) { return false; }
+
+    tree_node_destroy(child);
+
+    // swap delete the parent
+    parent->dir.children[child_idx] = GET_SLOT(parent);
+    parent->dir.num_children--;
+
+    return true;
+}
+
+bool tree_node_delete_child_by_name(Tree_Node* tn, const char* name)
+{
+    uint32_t child_idx = tree_node_find_child_by_name(tn, name);
+
+    if (child_idx == MAX_CHILDREN) { return false; }
+
+    tree_node_destroy(tn->dir.children[child_idx]);
+
+    // swap delete the parent
+    tn->dir.children[child_idx] = GET_SLOT(tn);
+    tn->dir.num_children--;
+
+    return true;
+}
+
+uint32_t tree_node_find_child(Tree_Node* parent, Tree_Node* child)
+{
+    if (parent->type != NODE_BRANCH) { return MAX_CHILDREN; }
+
     uint32_t child_idx = MAX_CHILDREN;
     for (uint32_t i = 0; i < MAX_CHILDREN; i++) {
         if (strcmp(parent->name, child->name) == 0) {
@@ -124,8 +156,22 @@ bool tree_node_delete(Tree_Node* parent, Tree_Node* child)
             break;
         }
     }
-    // not found
-    if (child_idx == MAX_CHILDREN) { return false; }
 
+    return child_idx;
+}
+
+uint32_t tree_node_find_child_by_name(Tree_Node* parent, const char* name)
+{
+    if (parent->type != NODE_BRANCH) { return MAX_CHILDREN; }
+
+    uint32_t child_idx = MAX_CHILDREN;
+    for (uint32_t i = 0; i < MAX_CHILDREN; i++) {
+        if (strcmp(parent->name, name) == 0) {
+            child_idx = i;
+            break;
+        }
+    }
+
+    return child_idx;
 }
 
