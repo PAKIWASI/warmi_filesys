@@ -70,6 +70,9 @@ bool filesystem_save(filesystem* fs, const char* path);
 bool filesystem_load(const char* filepath);
 
 
+// visual
+
+void filesystem_print(filesystem* fs);
 // TODO: 11. Show memory map → should show the distribution of files in the memory.
 
 #endif // FILESYSTEM_H

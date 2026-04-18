@@ -67,6 +67,9 @@ bool tree_node_delete_child(Tree_Node* parent, Tree_Node* child);
 
 bool tree_node_delete_child_by_name(Tree_Node* tn, const char* name);
 
+// only remove child from children arr of parent
+bool tree_node_delete_child_ref(Tree_Node* parent, Tree_Node* child);
+
 
 // file read/write
 

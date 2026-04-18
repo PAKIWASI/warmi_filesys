@@ -49,11 +49,11 @@ void filesystem_ls(filesystem* fs)
     uint32_t num_children = curr_dir->dir.num_children;
 
     if (num_children == 0) {
-        printf("Empty Directory\n");
+        printf("Show Dir \"%s\": Empty Directory\n", curr_dir->name);
         return;
     }
 
-    printf("%s:\n", curr_dir->name);
+    printf("Show Dir \"%s\":\n", curr_dir->name);
     for (uint32_t i = 0; i < num_children; i++) {
         printf("\t- %s\n", curr_dir->dir.children[i]->name);
     }
@@ -66,7 +66,7 @@ bool filesystem_cd(filesystem* fs, const char* dirname)
     uint32_t child_idx = tree_node_find_child_by_name(curr_dir, dirname);
 
     if (child_idx == MAX_CHILDREN) {
-        printf("Director %s not found\n", dirname);
+        printf("%s not found\n", dirname);
         return false;
     }
 
@@ -77,22 +77,22 @@ bool filesystem_cd(filesystem* fs, const char* dirname)
         return false;
     }
 
-    if (fs->curr_depth == MAX_DEPTH) {
-        printf("max depth of filesystem reached\n");
-        return false;
-    }
-
     GET_INSERT_POS(fs) = child;
     fs->curr_depth++;
 
+    printf("Changed Dir to %s\n", dirname);
     return true;
 }
 
-// TODO: how will we handle num_children decrement?
 bool filesyste_mv(filesystem* fs, const char* name, const char* move_to)
 {
     Tree_Node* curr_dir = GET_CURR_DIR(fs);
     uint32_t child_idx = tree_node_find_child_by_name(curr_dir, name);
+    
+    if (child_idx == MAX_CHILDREN) {
+        printf("%s not found\n", name);
+        return false;
+    }
 
     Tree_Node* child = curr_dir->dir.children[child_idx];
 
@@ -103,10 +103,79 @@ bool filesyste_mv(filesystem* fs, const char* name, const char* move_to)
 
         Tree_Node* parent = fs->curr_dirs[fs->curr_depth - 2];
         // parent is full
-        if (parent->dir.num_children == MAX_CHILDREN) { return false; }
+        if (parent->dir.num_children == MAX_CHILDREN) {
+            printf("%s is full\n", parent->name);
+            return false;
+        }
 
+        parent->dir.children[parent->dir.num_children] = child;
+        parent->dir.num_children++;
 
+        printf("Moved %s to %s", name, move_to);
+        return tree_node_delete_child_ref(curr_dir, child);
     }
 
+    // move to a directory in curr dir
+    uint32_t dest_idx = tree_node_find_child_by_name(curr_dir, move_to);
+    
+    if (dest_idx == MAX_CHILDREN) {
+        printf("%s not found\n", move_to);
+        return false;
+    }
+    
+    Tree_Node* dest_dir = curr_dir->dir.children[dest_idx];
+
+    if (dest_dir->type != NODE_BRANCH) {
+        printf("%s is a file\n", move_to);
+        return false;
+    }
+
+    if (dest_dir->dir.num_children == MAX_CHILDREN) {
+        printf("%s is full\n", dest_dir->name);
+        return false;
+    }
+
+    dest_dir->dir.children[dest_dir->dir.num_children] = child;
+    dest_dir->dir.num_children++;
+
+    printf("Moved %s to %s", name, move_to);
+    // remove ref of the moved file from curr_dir
+    return tree_node_delete_child_ref(curr_dir, child);
 }
+
+Tree_Node* filesystem_touch(filesystem* fs, const char* name)
+{
+    Tree_Node* curr_dir = GET_CURR_DIR(fs);
+
+    if (curr_dir->dir.num_children == MAX_CHILDREN) {
+        printf("%s is full\n", curr_dir->name);
+        return NULL;
+    }
+
+    return tree_node_create_child(curr_dir, name, NODE_LEAF);
+}
+
+Tree_Node* filesystem_mkdir(filesystem* fs, const char* name)
+{
+    Tree_Node* curr_dir = GET_CURR_DIR(fs);
+
+    if (curr_dir->dir.num_children == MAX_CHILDREN) {
+        printf("%s is full\n", curr_dir->name);
+        return NULL;
+    }
+
+    return tree_node_create_child(curr_dir, name, NODE_BRANCH);
+}
+
+bool filesystem_rm(filesystem* fs, const char* name)
+{
+    Tree_Node* curr_dir = GET_CURR_DIR(fs);
+
+    if (!tree_node_delete_child_by_name(curr_dir, name)) {
+        printf("%s not found\n", name);
+        return false;
+    }
+    return true;
+}
+
 

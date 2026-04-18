@@ -15,8 +15,7 @@ Tree_Node* tree_node_create(const char* name, NODE_TYPE type)
     Tree_Node* tn = malloc(sizeof(Tree_Node));
 
     tn->name = malloc(MAX_NAME_SIZE);
-    memcpy(tn->name, name, MAX_NAME_SIZE - 1);
-    tn->name[MAX_NAME_SIZE - 1] = '\0';
+    strcpy(tn->name, name);
 
     tn->type = type;
 
@@ -68,6 +67,7 @@ Tree_Node* tree_node_create_child(Tree_Node* tn, const char* name, NODE_TYPE typ
     GET_INSERT_POS(tn) = cn;  // set child
     tn->dir.num_children++; // child counter increment
 
+    printf("Created: %s/%s\n", tn->name, name);
     return cn;
 }
 
@@ -81,19 +81,6 @@ Tree_Node* tree_node_append_node(Tree_Node* parent, Tree_Node* child)
 
     return child;
 }
-
-// char* tree_node_read_file(Tree_Node* tn, uint32_t start, uint32_t size)
-// {
-//     if (tn->type != NODE_LEAF) { return NULL; }
-//
-//     // clamp to max file size if size is greater
-//     size = (start + size) >= MAX_FILE_SIZE ? MAX_FILE_SIZE - start - 1 : size;
-//
-//     char* read = malloc(size + 1);  // +1 for null terminator
-//     memcpy(read, tn->file.data + start, size);
-//     read[size] = '\0';              // null terminate
-//     return read;
-// }
 
 void tree_node_read_file(Tree_Node* tn, uint32_t start, uint32_t size)
 {
@@ -138,6 +125,7 @@ bool tree_node_delete_child(Tree_Node* parent, Tree_Node* child)
     // not found
     if (child_idx == MAX_CHILDREN) { return false; }
 
+    printf("Deleted: %s/%s\n", parent->name, child->name);
     tree_node_destroy(child);
 
     // swap delete the parent       // BUG: get slot has next insert pos
@@ -158,6 +146,21 @@ bool tree_node_delete_child_by_name(Tree_Node* tn, const char* name)
     // swap delete the parent
     tn->dir.num_children--;
     tn->dir.children[child_idx] = GET_INSERT_POS(tn);
+
+    printf("Deleted: %s/%s\n", tn->name, name);
+    return true;
+}
+
+bool tree_node_delete_child_ref(Tree_Node* parent, Tree_Node* child)
+{
+    uint32_t child_idx = tree_node_find_child(parent, child);
+
+    if (child_idx == MAX_CHILDREN) { return false; }
+
+
+    // swap delete the parent
+    parent->dir.num_children--;
+    parent->dir.children[child_idx] = GET_INSERT_POS(parent);
 
     return true;
 }
@@ -182,8 +185,8 @@ uint32_t tree_node_find_child_by_name(Tree_Node* parent, const char* name)
     if (parent->type != NODE_BRANCH) { return MAX_CHILDREN; }
 
     uint32_t child_idx = MAX_CHILDREN;
-    for (uint32_t i = 0; i < MAX_CHILDREN; i++) {
-        if (strcmp(parent->name, name) == 0) {
+    for (uint32_t i = 0; i < parent->dir.num_children; i++) {
+        if (strcmp(parent->dir.children[i]->name, name) == 0) {
             child_idx = i;
             break;
         }
