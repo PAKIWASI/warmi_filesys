@@ -87,13 +87,14 @@ void tree_node_read_file(Tree_Node* tn, uint32_t start, uint32_t size)
     if (tn->type != NODE_LEAF) { return; }
 
     // clamp to max file size if size is greater
-    uint32_t end = (start + size) >= MAX_FILE_SIZE ?
-                    MAX_FILE_SIZE - 1 : (start + size);
+    uint32_t end = (start + size) >= tn->file.size ?
+                    tn->file.size - 1 : (start + size);
 
-    putchar('\n');
+    printf("\n%s:\n", tn->name);
     for (uint32_t i = start; i < end; i++) {
         putchar(tn->file.data[i]);
     }
+    putchar('\n');
     putchar('\n');
 }
 
@@ -104,18 +105,20 @@ char* tree_node_write_file(Tree_Node* tn, const char* data, uint32_t size, bool 
     // if overwriting, start writing from the start
     if (overwrite) {
         tn->file.pos = 0;
-        tn->file.size = size;
-    } else {
-        tn->file.size += size;
     }
     
     // if there is more to write than we have space, we only write as much as we have space
     if (tn->file.pos + size >= MAX_FILE_SIZE) {
         size = MAX_FILE_SIZE - tn->file.pos - 1;
+        // TODO: check
+        tn->file.size = size;
+    } else {
+        tn->file.size = tn->file.pos + size;
     }
     
     memcpy(tn->file.data + tn->file.pos, data, size);
 
+    printf("Written to: %s\n", tn->name);
     return tn->file.data;   // return the file's data
 }
 
@@ -128,7 +131,7 @@ bool tree_node_delete_child(Tree_Node* parent, Tree_Node* child)
     printf("Deleted: %s/%s\n", parent->name, child->name);
     tree_node_destroy(child);
 
-    // swap delete the parent       // BUG: get slot has next insert pos
+    // swap delete the parent
     parent->dir.num_children--;
     parent->dir.children[child_idx] = GET_INSERT_POS(parent);
 
@@ -157,7 +160,6 @@ bool tree_node_delete_child_ref(Tree_Node* parent, Tree_Node* child)
 
     if (child_idx == MAX_CHILDREN) { return false; }
 
-
     // swap delete the parent
     parent->dir.num_children--;
     parent->dir.children[child_idx] = GET_INSERT_POS(parent);
@@ -170,8 +172,8 @@ uint32_t tree_node_find_child(Tree_Node* parent, Tree_Node* child)
     if (parent->type != NODE_BRANCH) { return MAX_CHILDREN; }
 
     uint32_t child_idx = MAX_CHILDREN;
-    for (uint32_t i = 0; i < MAX_CHILDREN; i++) {
-        if (strcmp(parent->name, child->name) == 0) {
+    for (uint32_t i = 0; i < parent->dir.num_children; i++) {
+        if (strcmp(parent->dir.children[i]->name, child->name) == 0) {
             child_idx = i;
             break;
         }

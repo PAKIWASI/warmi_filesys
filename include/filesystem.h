@@ -2,7 +2,9 @@
 #define FILESYSTEM_H
 
 #include "tree_node.h"
+
 #include <stdint.h>
+
 
 // max recursive depth of filesystem
 #define MAX_DEPTH 256
@@ -15,11 +17,8 @@ typedef struct {
     // stack of current directories indexed by depth
     // top of stack points to current directory we are in
     Tree_Node** curr_dirs;
-
-    // metadata about filesystem
     uint32_t curr_depth;
-    uint32_t total_files;
-    uint32_t total_dirs;
+
 } filesystem;
 
 
@@ -33,14 +32,15 @@ void filesystem_destroy(filesystem* fs);
 // filesystem navigation
 
 // the "ls" command equivalent
-void filesystem_ls(filesystem* fs);
+// option dirname for viewing contents of a nested dir
+void filesystem_ls(filesystem* fs, const char* dirname);
 
 // the "cd" command equivalent
 // supports ".." to go to parent
 bool filesystem_cd(filesystem* fs, const char* dirname);
 
 // supports any dir name in curr_dir or ".." to move one layer up
-bool filesyste_mv(filesystem* fs, const char* name, const char* move_to);
+bool filesystem_mv(filesystem* fs, const char* name, const char* move_to);
 
 
 // file/directory creation/deletion
@@ -58,16 +58,19 @@ bool filesystem_rm(filesystem* fs, const char* name);
 // file reading/writing
 
 // view a file in the current directory
-bool filesystem_cat(filesystem* fs, const char* name, uint32_t start, uint32_t size);
+bool filesystem_cat(filesystem* fs, const char* filename, uint32_t start, uint32_t size);
 
-bool filesystem_write_file(filesystem* fs, const char* data, bool overwrite);
+bool filesystem_write_file(filesystem* fs, const char* filename, const char* data, uint32_t size, bool overwrite);
+
+// move cursor to a specific position in the file to write
+bool filesystem_move_cursor(filesystem* fs, const char* filename, uint32_t pos);
 
 
 // persistance
 
 bool filesystem_save(filesystem* fs, const char* path);
 
-bool filesystem_load(const char* filepath);
+filesystem* filesystem_load(const char* filepath);
 
 
 // visual
