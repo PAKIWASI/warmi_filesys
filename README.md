@@ -4,6 +4,8 @@
 - Wasi Ullah
 - Armaghan Mehmood Shams (200KG)
 
+**GitHub:** [github.com/wasi-ullah/warmi-fs](https://github.com/PAKIWASI/warmi_filesys)
+
 ---
 
 ## Overview
@@ -22,11 +24,11 @@ warmi/
 ├── src/
 │   ├── filesystem.c      # Filesystem operations implementation
 │   ├── tree_node.c       # Tree node operations implementation
-│   └── main.c            # Demo / test entry point
+│   └── main.c            # CLI entry point
 ├── data/
 │   └── warmi.bin         # Persistent binary save file (generated on run)
 ├── build/
-    └── main.exe
+│   └── main.exe
 └── README.md
 ```
 
@@ -57,7 +59,92 @@ root/
 ```bash
 gcc src/main.c src/filesystem.c src/tree_node.c -Iinclude -o warmi
 mkdir -p data
+```
+
+---
+
+## Modes of Execution
+
+WArmi has two ways to use it.
+
+### 1. Interactive CLI
+
+Run the executable with no arguments to enter the interactive shell. On startup it automatically loads `./data/warmi.bin` if one exists, or creates a fresh filesystem if not. Your state is saved automatically on `exit`.
+
+```bash
 ./warmi
+```
+
+The prompt shows your current path and updates as you navigate:
+
+```
+warmi:/> mkdir projects
+warmi:/> cd projects
+warmi:/projects> touch notes.txt
+warmi:/projects> write notes.txt hello world
+warmi:/projects> cat notes.txt
+warmi:/projects> cd ..
+warmi:/> tree
+warmi:/> exit
+```
+
+Full list of CLI commands:
+
+| Command | Description |
+|---|---|
+| `ls [dirname]` | List current directory, or a named subdirectory |
+| `cd <dirname\|..>` | Change into a directory, or go up one level |
+| `tree` | Print the full filesystem tree from root |
+| `touch <n>` | Create a new empty file |
+| `mkdir <n>` | Create a new directory |
+| `rm <n>` | Delete a file or directory |
+| `mv <n> <dest\|..>` | Move a file/dir into a subdirectory, or up one level |
+| `cat <file> [start size]` | Read a file. Defaults to reading the whole file |
+| `write <file> <text>` | Overwrite a file with text |
+| `append <file> <text>` | Append text at the current cursor position |
+| `seek <file> <pos>` | Move the write cursor to a byte position |
+| `save [path]` | Save the filesystem (default: `./data/warmi.bin`) |
+| `load [path]` | Load a filesystem from file |
+| `help` | Show the command menu |
+| `exit / quit` | Save and quit |
+
+### 2. C API (Programmatic)
+
+You can use the filesystem directly in C code by calling the API functions. This is useful for scripting a sequence of operations or embedding the filesystem in a larger program.
+
+```c
+#include "filesystem.h"
+
+int main(void)
+{
+    filesystem* fs = filesystem_create();
+
+    filesystem_touch(fs, "notes.txt");
+    filesystem_mkdir(fs, "projects");
+    filesystem_cd(fs, "projects");
+    filesystem_touch(fs, "todo.txt");
+
+    filesystem_write_file(fs, "todo.txt", "buy milk\n", 9, true);
+
+    // append more at byte 9
+    filesystem_move_cursor(fs, "todo.txt", 9);
+    filesystem_write_file(fs, "todo.txt", "write code\n", 11, false);
+
+    filesystem_cat(fs, "todo.txt", 0, 1000);
+
+    filesystem_cd(fs, "..");
+    filesystem_print(fs);
+
+    filesystem_save(fs, "./data/warmi.bin");
+    filesystem_destroy(fs);
+
+    // reload and verify
+    filesystem* fs2 = filesystem_load("./data/warmi.bin");
+    filesystem_print(fs2);
+    filesystem_destroy(fs2);
+
+    return 0;
+}
 ```
 
 ---
@@ -75,9 +162,9 @@ mkdir -p data
 
 | Function | Description |
 |---|---|
-| `filesystem_ls(fs, dirname)` | Lists contents of current dir, or a named subdirectory if `dirname` is provided (pass `NULL` for current) |
+| `filesystem_ls(fs, dirname)` | Lists contents of current dir, or a named subdirectory. Pass `NULL` for current dir |
 | `filesystem_cd(fs, dirname)` | Change into a subdirectory. Pass `".."` to go up one level |
-| `filesystem_mv(fs, name, move_to)` | Move a file or directory to another directory in the current dir, or `".."` to move it up |
+| `filesystem_mv(fs, name, move_to)` | Move a file or directory into a subdirectory, or `".."` to move it up |
 
 ### File & Directory Creation/Deletion
 
@@ -92,7 +179,7 @@ mkdir -p data
 | Function | Description |
 |---|---|
 | `filesystem_cat(fs, filename, start, size)` | Print `size` bytes of a file starting at byte `start` |
-| `filesystem_write_file(fs, filename, data, size, overwrite)` | Write data to a file. If `overwrite=true`, resets cursor to 0 first (overwrite mode). If `false`, writes at the current cursor position (append/write-at mode) |
+| `filesystem_write_file(fs, filename, data, size, overwrite)` | Write data to a file. `overwrite=true` resets cursor to 0 first; `false` writes at the current cursor position |
 | `filesystem_move_cursor(fs, filename, pos)` | Move the write cursor to a specific byte position in a file |
 
 ### Persistence
@@ -110,44 +197,6 @@ mkdir -p data
 
 ---
 
-## Usage Example
-
-```c
-filesystem* fs = filesystem_create();
-
-// Create files and directories
-filesystem_touch(fs, "notes.txt");
-filesystem_mkdir(fs, "projects");
-
-// Navigate into a directory
-filesystem_cd(fs, "projects");
-filesystem_touch(fs, "todo.txt");
-
-// Write to a file
-filesystem_write_file(fs, "todo.txt", "buy milk\n", 9, true);
-
-// Append more data
-filesystem_move_cursor(fs, "todo.txt", 9);
-filesystem_write_file(fs, "todo.txt", "write code\n", 11, false);
-
-// Read it back
-filesystem_cat(fs, "todo.txt", 0, 1000);
-
-// Go back up and print the tree
-filesystem_cd(fs, "..");
-filesystem_print(fs);
-
-// Save and reload
-filesystem_save(fs, "./data/warmi.bin");
-filesystem_destroy(fs);
-
-filesystem* fs2 = filesystem_load("./data/warmi.bin");
-filesystem_print(fs2);
-filesystem_destroy(fs2);
-```
-
----
-
 ## Limits
 
 | Constant | Value | Meaning |
@@ -156,5 +205,3 @@ filesystem_destroy(fs2);
 | `MAX_CHILDREN` | 256 | Maximum files/dirs per directory |
 | `MAX_FILE_SIZE` | 4096 bytes | Maximum size of a single file |
 | `MAX_NAME_SIZE` | 128 bytes | Maximum length of a file/directory name |
-
----
