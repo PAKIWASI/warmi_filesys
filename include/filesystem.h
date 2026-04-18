@@ -17,7 +17,7 @@ typedef struct {
     Tree_Node** curr_dirs;
 
     // metadata about filesystem
-    uint32_t depth;
+    uint32_t curr_depth;
     uint32_t total_files;
     uint32_t total_dirs;
 } filesystem;
@@ -33,17 +33,14 @@ void filesystem_destroy(filesystem* fs);
 // filesystem navigation
 
 // the "ls" command equivalent
-bool filesystem_ls(filesystem* fs);
+void filesystem_ls(filesystem* fs);
 
 // the "cd" command equivalent
 // supports ".." to go to parent
 bool filesystem_cd(filesystem* fs, const char* dirname);
 
-// move a file/dir "src" to "dest"
-bool filesystem_mv(filesystem* fs, Tree_Node* dest, Tree_Node* src);
-
 // supports any dir name in curr_dir or ".." to move one layer up
-bool filesyste_mv_by_name(filesystem* fs, Tree_Node* tn, const char* dir);
+bool filesyste_mv(filesystem* fs, const char* name, const char* move_to);
 
 
 // file/directory creation/deletion
@@ -73,6 +70,6 @@ bool filesystem_save(filesystem* fs, const char* path);
 bool filesystem_load(const char* filepath);
 
 
-// TODO:  11.	Show memory map → should show the distribution of files in the memory.
+// TODO: 11. Show memory map → should show the distribution of files in the memory.
 
 #endif // FILESYSTEM_H

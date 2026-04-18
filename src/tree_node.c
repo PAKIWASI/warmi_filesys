@@ -6,7 +6,7 @@
 #include <string.h>
 
 
-#define GET_SLOT(node) (node->dir.children[node->dir.num_children])
+#define GET_INSERT_POS(node) (node->dir.children[node->dir.num_children])
 
 
 
@@ -65,7 +65,7 @@ Tree_Node* tree_node_create_child(Tree_Node* tn, const char* name, NODE_TYPE typ
     if (tn->dir.num_children == MAX_CHILDREN) { return NULL; }
 
     Tree_Node* cn = tree_node_create(name, type);
-    GET_SLOT(tn) = cn;  // set child
+    GET_INSERT_POS(tn) = cn;  // set child
     tn->dir.num_children++; // child counter increment
 
     return cn;
@@ -76,7 +76,7 @@ Tree_Node* tree_node_append_node(Tree_Node* parent, Tree_Node* child)
     if (parent->type != NODE_BRANCH) { return NULL; }
     if (parent->dir.num_children == MAX_CHILDREN) { return NULL; }
 
-    GET_SLOT(parent) = child;
+    GET_INSERT_POS(parent) = child;
     parent->dir.num_children++;
 
     return child;
@@ -140,9 +140,9 @@ bool tree_node_delete_child(Tree_Node* parent, Tree_Node* child)
 
     tree_node_destroy(child);
 
-    // swap delete the parent
-    parent->dir.children[child_idx] = GET_SLOT(parent);
+    // swap delete the parent       // BUG: get slot has next insert pos
     parent->dir.num_children--;
+    parent->dir.children[child_idx] = GET_INSERT_POS(parent);
 
     return true;
 }
@@ -156,8 +156,8 @@ bool tree_node_delete_child_by_name(Tree_Node* tn, const char* name)
     tree_node_destroy(tn->dir.children[child_idx]);
 
     // swap delete the parent
-    tn->dir.children[child_idx] = GET_SLOT(tn);
     tn->dir.num_children--;
+    tn->dir.children[child_idx] = GET_INSERT_POS(tn);
 
     return true;
 }
