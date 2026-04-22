@@ -207,4 +207,3 @@ int main(void)
 | `MAX_FILE_SIZE` | 4096 bytes | Maximum size of a single file |
 | `MAX_NAME_SIZE` | 128 bytes | Maximum length of a file/directory name |
 
-THANK YOU!
