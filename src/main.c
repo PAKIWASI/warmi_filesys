@@ -18,13 +18,15 @@
     this root by creating files/directories
 */
 
-static int test1(void);
-static int test2(void);
+// helpers
 static void build_prompt(filesystem* fs, char* out, uint32_t out_sz);
 static bool read_line(const char* prompt, char* buf, uint32_t buf_sz);
 static int tokenise(char* line, char** toks, int max_toks);
 static void print_menu(void);
 
+// testing scripts
+static int test1(void);
+static int test2(void);
 
 #define SAVE_PATH   "./data/warmi.bin"
 #define INPUT_BUF   512
