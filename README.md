@@ -2,7 +2,7 @@
 
 ## Authors
 - Wasi Ullah
-- Armaghan Mehmood Shams (200KG)
+- Armaghan Mahmood Shams
 
 **GitHub:** [github.com/PAKIWASI/warmi_filesys](https://github.com/PAKIWASI/warmi_filesys)
 
