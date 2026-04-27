@@ -1,0 +1,3 @@
+mkdir ProjectArmi
+touch armi.txt
+write armi.txt helloooo
